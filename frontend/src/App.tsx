@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar, PageId } from './components/layout/Navbar';
+import { Navbar, type PageId } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { LandingPage } from './pages/LandingPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -7,9 +7,10 @@ import { GeneratorPage } from './pages/GeneratorPage';
 import { PdfUploadPage } from './pages/PdfUploadPage';
 import { NotesEditorPage } from './pages/NotesEditorPage';
 import { MyNotesPage } from './pages/MyNotesPage';
+import { TemplatesPage } from './pages/TemplatesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AboutPage } from './pages/AboutPage';
-import { Note, AppSettings } from './types';
+import type { Note, AppSettings } from './types';
 import { api, getStoredSettings } from './services/api';
 import { SAMPLE_NOTES } from './utils/sampleNotes';
 
@@ -19,11 +20,24 @@ export function App() {
   const [selectedNote, setSelectedNote] = useState<Note>(SAMPLE_NOTES[0]);
   const [settings, setSettings] = useState<AppSettings>(getStoredSettings());
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
+    return localStorage.getItem('app_theme') === 'dark';
+  });
 
   useEffect(() => {
     loadNotes();
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    if (isDarkTheme) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('app_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('app_theme', 'light');
+    }
+  }, [isDarkTheme]);
 
   const loadNotes = async () => {
     try {
@@ -86,19 +100,25 @@ export function App() {
     }
   };
 
+  const toggleTheme = () => {
+    setIsDarkTheme((prev) => !prev);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors">
       {/* Navbar */}
       <Navbar
         currentPage={currentPage}
         onNavigate={setCurrentPage}
         notesCount={notes.length}
         isDemoMode={settings.demoMode}
+        isDarkTheme={isDarkTheme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 animate-bounce">
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 border border-slate-700 animate-bounce">
           <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
           <span>{toastMessage}</span>
         </div>
@@ -152,6 +172,16 @@ export function App() {
             notes={notes}
             onSelectNote={setSelectedNote}
             onDeleteNote={handleDeleteNote}
+            onNavigate={setCurrentPage}
+          />
+        )}
+
+        {currentPage === 'templates' && (
+          <TemplatesPage
+            onSelectTemplate={(tpl) => {
+              setSelectedNote(tpl);
+              setNotes((prev) => [tpl, ...prev.filter((n) => n.id !== tpl.id)]);
+            }}
             onNavigate={setCurrentPage}
           />
         )}
