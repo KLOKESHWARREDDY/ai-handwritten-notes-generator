@@ -1,0 +1,24 @@
+{
+  "name": "ai-handwritten-notes-generator",
+  "version": "1.0.0",
+  "description": "AI-powered educational platform that converts plain text, syllabus topics and PDF study materials into realistic handwritten study notes.",
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "start:backend": "cd backend && uvicorn app.main:app --reload --port 8000",
+    "test:backend": "cd backend && python -m pytest",
+    "test": "npm run test:backend && npm run build:frontend"
+  },
+  "keywords": [
+    "ai",
+    "handwritten-notes",
+    "education",
+    "study-notes",
+    "exam-preparation",
+    "fastapi",
+    "react",
+    "openai"
+  ],
+  "author": "AI Handwritten Notes Generator Contributors",
+  "license": "MIT"
+}
